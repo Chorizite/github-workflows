@@ -50,8 +50,6 @@ jobs:
             echo "version=${{ env.GitVersion_FullSemVer }}" >> $GITHUB_OUTPUT
 
       - name: Build
-        with:
-          token: ${{ inputs.access_token }}
         run: |
           # build
           dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ inputs.token }} --store-password-in-clear-text --name chorizite "https://nuget.pkg.github.com/Chorizite/index.json"
