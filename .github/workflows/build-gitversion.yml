@@ -65,5 +65,4 @@ jobs:
       
       - name: Push GitHub NuGet Package
         run: |
-          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ github.token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" || true
-          dotnet nuget push "${{ github.workspace }}/${{ inputs.package_id }}.${{ env.GitVersion_FullSemVer }}.nupkg" --api-key ${{ github.token }} --source "github"
+          dotnet nuget push "${{ github.workspace }}/${{ inputs.package_id }}.${{ env.GitVersion_FullSemVer }}.nupkg" --api-key ${{ github.token }} --source "chorizite"
