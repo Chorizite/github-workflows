@@ -1,4 +1,4 @@
-name: 'Build using GitVersion'
+name: 'Build dotnet plugin using GitVersion'
 on:
   workflow_call:
     inputs:
@@ -13,18 +13,12 @@ on:
         required: false
         type: string
         default: "manifest.json"
-    outputs:
-      version:
-        description: "The plugin version that was built"
-        value: ${{ jobs.build.outputs.version }}
 jobs:
   build:
     permissions:
       packages: write
       contents: write
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.step1.manifest_version.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,13 +38,12 @@ jobs:
         id: manifest_version
         run: |
             echo "$( jq '.version = "${{ env.GitVersion_FullSemVer }}"' ${{ inputs.manifest }} )" > ${{ inputs.manifest }}
-            echo "version=${{ env.GitVersion_FullSemVer }}" >> $GITHUB_OUTPUT
 
       - name: Build
         run: |
           # build
           dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ github.token }} --store-password-in-clear-text --name chorizite "https://nuget.pkg.github.com/Chorizite/index.json"
-          dotnet restore
+          dotnet restore ${{ inputs.plugin_sln }}
           dotnet build -c Release --no-restore "-p:PackageOutputPath=${{ github.workspace }};OutputPath=${{ github.workspace}}/bin/" ${{ inputs.plugin_sln }}
 
       - uses: actions/upload-artifact@v4
