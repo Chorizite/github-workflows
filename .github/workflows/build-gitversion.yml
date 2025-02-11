@@ -52,7 +52,7 @@ jobs:
       - name: Build
         run: |
           # build
-          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ inputs.token }} --store-password-in-clear-text --name chorizite "https://nuget.pkg.github.com/Chorizite/index.json"
+          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ inputs.access_token }} --store-password-in-clear-text --name chorizite "https://nuget.pkg.github.com/Chorizite/index.json"
           dotnet restore
           dotnet build -c Release --no-restore "-p:PackageOutputPath=${{ github.workspace }};OutputPath=${{ github.workspace}}/bin/" ${{ inputs.plugin_sln }}
 
