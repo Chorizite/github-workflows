@@ -5,9 +5,6 @@ on:
       package_id:
         required: true
         type: string
-      plugin_bin_dir:
-        required: true
-        type: string
       plugin_sln:
         required: false
         type: string
@@ -15,7 +12,7 @@ on:
       manifest:
         required: false
         type: string
-        default: "${{ github.workspace }}/manifest.json"
+        default: "manifest.json"
     secrets:
       access_token:
         required: true
@@ -67,7 +64,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with: 
           name: "${{ inputs.package_id }}.${{ env.GitVersion_FullSemVer }}.zip"
-          path: "${{ inputs.plugin_bin_dir }}/"
+          path: "${{ github.workspace}}/bin/"
       
       - name: Push GitHub NuGet Package
         run: |
