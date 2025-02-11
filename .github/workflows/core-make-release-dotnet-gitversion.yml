@@ -89,7 +89,7 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="Release v${{ env.GitVersion_MajorMinorPatch }}" \
               --generate-notes \
-              "${{ github.workspace }}/bin/${{ inputs.package_id }}.${{ env.GitVersion_MajorMinorPatch }}.zip#${{ inputs.package_id }}.${{ env.GitVersion_MajorMinorPatch }}.zip"
+              "${{ github.workspace }}/${{ inputs.package_id }}.${{ env.GitVersion_MajorMinorPatch }}.zip#${{ inputs.package_id }}.${{ env.GitVersion_MajorMinorPatch }}.zip"
               
       - name: Bump version
         run: |
