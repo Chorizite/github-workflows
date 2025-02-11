@@ -57,7 +57,7 @@ jobs:
           # build
           dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ github.event.secrets.access_token }} --store-password-in-clear-text --name chorizite "https://nuget.pkg.github.com/Chorizite/index.json"
           dotnet restore
-          dotnet build -c Release --no-restore -p:PackageOutputPath="${{ github.workspace }}" ${{ github.event.inputs.plugin_sln }}
+          dotnet build -c Release --no-restore "-p:PackageOutputPath=${{ github.workspace }};OutputPath=${{ github.workspace}}/bin/" ${{ github.event.inputs.plugin_sln }}
 
       - uses: actions/upload-artifact@v4
         with: 
