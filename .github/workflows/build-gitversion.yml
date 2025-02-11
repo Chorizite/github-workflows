@@ -1,16 +1,21 @@
-name: 'Build'
+name: 'Build using GitVersion'
 on:
   workflow_call:
     inputs:
-      nuget_package_id:
+      package_id:
         required: true
         type: string
       plugin_bin_dir:
         required: true
         type: string
-      nuget_package_dir:
-        required: true
+      plugin_sln:
+        required: false
         type: string
+        default: "*.sln"
+      manifest:
+        required: false
+        type: string
+        default: "${{ github.workspace }}/manifest.json"
     secrets:
       access_token:
         required: true
@@ -44,27 +49,27 @@ jobs:
       - name: Update manifest version
         id: manifest_version
         run: |
-            echo "$( jq '.version = "${{ env.GitVersion_FullSemVer }}"' ${{ github.workspace }}/manifest.json )" > ${{ github.workspace }}/manifest.json
+            echo "$( jq '.version = "${{ env.GitVersion_FullSemVer }}"' ${{ github.event.inputs.manifest }} )" > ${{ github.event.inputs.manifest }}
             echo "version=${{ env.GitVersion_FullSemVer }}" >> $GITHUB_OUTPUT
 
       - name: Build
         run: |
           # build
-          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name chorizite "https://nuget.pkg.github.com/Chorizite/index.json"
+          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ github.event.secrets.access_token }} --store-password-in-clear-text --name chorizite "https://nuget.pkg.github.com/Chorizite/index.json"
           dotnet restore
-          dotnet build -c Release --no-restore
+          dotnet build -c Release --no-restore -p:PackageOutputPath="${{ github.workspace }}" ${{ github.event.inputs.plugin_sln }}
 
       - uses: actions/upload-artifact@v4
         with: 
-          name: "${{ inputs.nuget_package_id }}.${{ env.GitVersion_FullSemVer }}.nupkg"
-          path: "${{ inputs.nuget_package_dir }}/${{ inputs.nuget_package_id }}.${{ env.GitVersion_FullSemVer }}.nupkg"
+          name: "${{ github.event.inputs.package_id }}.${{ env.GitVersion_FullSemVer }}.nupkg"
+          path: "${{ github.workspace }}/${{ github.event.inputs.package_id }}.${{ env.GitVersion_FullSemVer }}.nupkg"
 
       - uses: actions/upload-artifact@v4
         with: 
-          name: "${{ inputs.nuget_package_id }}.${{ env.GitVersion_FullSemVer }}.zip"
-          path: "${{ inputs.plugin_bin_dir }}/"
+          name: "${{ github.event.inputs.package_id }}.${{ env.GitVersion_FullSemVer }}.zip"
+          path: "${{ github.event.inputs.plugin_bin_dir }}/"
       
       - name: Push GitHub NuGet Package
         run: |
-          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-          dotnet nuget push "${{ inputs.nuget_package_dir }}/${{ inputs.nuget_package_id }}.${{ env.GitVersion_FullSemVer }}.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ github.event.secrets.access_token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+          dotnet nuget push "${{ github.workspace }}/${{ github.event.inputs.package_id }}.${{ env.GitVersion_FullSemVer }}.nupkg" --api-key ${{ github.event.secrets.access_token }} --source "github"
